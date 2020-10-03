@@ -132,6 +132,8 @@ void display_screen (void)  {
 
   gde021a1_drv.RefreshDisplay();
   while (HAL_GPIO_ReadPin(EPD_BUSY_GPIO_PORT, EPD_BUSY_PIN) != (uint16_t)RESET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_SET);
+  for (uint32_t i=0; i<100000; i++);
 }
 
 #else
