@@ -18,6 +18,12 @@ RM := rm -rf
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(strip $(S_DEPS)),)
+-include $(S_DEPS)
+endif
+ifneq ($(strip $(S_UPPER_DEPS)),)
+-include $(S_UPPER_DEPS)
+endif
 ifneq ($(strip $(C_DEPS)),)
 -include $(C_DEPS)
 endif
@@ -43,8 +49,8 @@ screen_paper.bin \
 all: screen_paper.elf secondary-outputs
 
 # Tool invocations
-screen_paper.elf: $(OBJS) $(USER_OBJS) H:\Projects\Paper_screen_tdd\hardware\STM32L053C8TX_FLASH.ld
-	arm-none-eabi-gcc -o "screen_paper.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"H:\Projects\Paper_screen_tdd\hardware\STM32L053C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="screen_paper.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+screen_paper.elf: $(OBJS) $(USER_OBJS) D:\Paper_screen\dcdc_display\hardware\STM32L053C8TX_FLASH.ld
+	arm-none-eabi-gcc -o "screen_paper.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"D:\Paper_screen\dcdc_display\hardware\STM32L053C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="screen_paper.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

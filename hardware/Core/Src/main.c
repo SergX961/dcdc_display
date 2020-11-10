@@ -20,8 +20,11 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "adc.h"
+#include "dma.h"
 #include "i2c.h"
 #include "spi.h"
+#include "tim.h"
 #include "tsc.h"
 #include "usart.h"
 #include "usb.h"
@@ -49,7 +52,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+uint16_t adc = 0;
+volatile uint8_t flag = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -61,6 +65,26 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc_var)
+{
+	if(hadc_var->Instance == ADC1){
+
+		//adc=HAL_ADC_GetValue(hadc_var);
+/*
+		uint8_t str[20];
+		sprintf(str, "Screen %d", adc);
+		adc=0;
+		clear_paper_screen();
+		draw_string(20, 50, str);
+		display_screen();
+*/
+		if (adc>1000)
+			flag=1;
+
+	}
+	//HAL_TIM_Base_Stop_IT(&htim6);
+	//HAL_ADC_Stop(hadc_var);
+}
 /* USER CODE END 0 */
 
 /**
@@ -91,31 +115,54 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_I2C1_Init();
   MX_SPI1_Init();
   MX_SPI2_Init();
   MX_TSC_Init();
   MX_USART1_UART_Init();
   MX_USB_PCD_Init();
+  MX_ADC_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
 
 	gde021a1_Init();
 	gde021a1_Init(); //why need 2 init?!
 
   // for debug // BEGIN
+/*
 	#define BLACK 0
 	clear_paper_screen();
 	set_font(12);
-	uint8_t string[] = "V.1 memory display";
+	/*uint8_t string[] = "V.1 memory display";
 	draw_string(20, 50, string);
 	draw_h_line(0, 40 , 172);
 	draw_rectangle(15, 45, 140, 20);
 	fill_rectangle(10, 10, 152, 10, BLACK);
 
 	display_screen();
-//	HAL_Delay(3000);
-//	fill_rectangle(0, 0, 172, 40, BLACK);
-//	display_screen();
+	*/
+	//draw_main_screen();
+	//draw_menu_parametr_screen();
+	clear_paper_screen();
+	draw_confirm_param_screen();
+
+	//draw_string_fix_len(30, 1, 0, &"STR1");
+	//draw_string_fix_len(30, 13, 0, &"STR11111");
+	//draw_string_fix_len(30, 25, 0, &"STR12222222");
+	display_screen();
+	HAL_ADCEx_Calibration_Start(&hadc, 0);
+	//HAL_ADC_Start_IT(&hadc);
+	HAL_ADC_Start_DMA(&hadc, (uint16_t*)&adc, 1);
+
+
+	          //HAL_ADC_PollForConversion(&hadc, 100); // ожидаем окончания преобразования
+	          //adc = HAL_ADC_GetValue(&hadc); // читаем полученное значение в переменную adc
+	          //HAL_ADC_Stop(&hadc);
+
+	HAL_TIM_Base_Start_IT(&htim6);
+//	HAL_Delay(5000);
+
   // for debug // END
 
   /* USER CODE END 2 */
@@ -124,6 +171,16 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  flag=0;
+	  if (adc>1000){
+		//flag=0;
+		uint8_t str[20];
+		sprintf(str, "Screen %d", adc);
+		//adc=0;
+		clear_paper_screen();
+		draw_string(20, 50, str);
+		display_screen();
+	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -141,10 +198,10 @@ void SystemClock_Config(void)
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
-  /** Configure the main internal regulator output voltage 
+  /** Configure the main internal regulator output voltage
   */
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-  /** Initializes the CPU, AHB and APB busses clocks 
+  /** Initializes the CPU, AHB and APB busses clocks
   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_HSI48;
   RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
@@ -157,7 +214,7 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  /** Initializes the CPU, AHB and APB busses clocks 
+  /** Initializes the CPU, AHB and APB busses clocks
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
@@ -206,7 +263,7 @@ void Error_Handler(void)
   * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
-{ 
+{
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
      tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */

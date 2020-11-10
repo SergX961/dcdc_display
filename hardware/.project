@@ -29,17 +29,18 @@
 		<nature>com.st.stm32cube.ide.mcu.MCURootProjectNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
+		<nature>com.st.stm32cube.ide.mcu.MCUCubeIdeServicesRevAev2ProjectNature</nature>
 	</natures>
 	<linkedResources>
 		<link>
 			<name>inc</name>
 			<type>2</type>
-			<location>H:/Projects/Paper_screen_tdd/software/inc</location>
+			<location>D:/Paper_screen/dcdc_display/software/inc</location>
 		</link>
 		<link>
 			<name>src</name>
 			<type>2</type>
-			<location>H:/Projects/Paper_screen_tdd/software/src</location>
+			<location>D:/Paper_screen/dcdc_display/software/src</location>
 		</link>
 	</linkedResources>
 </projectDescription>

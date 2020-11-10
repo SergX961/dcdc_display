@@ -12,10 +12,34 @@
 #define NUM_BIT_ON_PIX 2
 #define NUM_PIX_ON_CELL 4 
 
+
 static sFONT * pFont = &Font12;
+uint8_t current_info_row = 0;
+uint32_t current_parametr_screen = 0;
+
 
 
 uint8_t screen_paper_memory[3096] = {0};
+uint8_t info_names[MAX_INFO_ROWS_NUM][30] = {
+		"Voltage cut", "Charging type", "Charge threshold Pb lower", "Charge threshold Pb upper",
+		"Charge threshold others", "Discharge threshold", "Quantity cans", "Capacity",
+		"Max allowable capacity", "Internal voltage default", "Type battery"
+	};
+uint8_t info_values[MAX_INFO_ROWS_NUM][20] = {
+		"5V", "TEXT", "TEXT", "TEXT",
+		"TEXT", "TEXT", "TEXT", "TEXT",
+		"TEXT", "TEXT", "TEXT"
+	};
+uint8_t info_note[MAX_INFO_ROWS_NUM][50] = {
+		"Ni-ca:5-10V\tLiFePO4:1215\nLi-io:7-12V\tSLA:4-15V",
+		"TEXT12\tTEXT\nTEXT\tTEXT12", "TEXTTEXT TEXT\nTEXT TEXTTEXT", "TEXTTEXTTEXTTEXTTEXTTEXTTEXT",
+		"TEXT", "TEXT", "TEXT", "TEXT",
+		"TEXT", "TEXT", "TEXT"
+};
+uint8_t info_note_fonts[MAX_INFO_ROWS_NUM] = {
+		16, 16, 12, 12, 12, 12, 16, 16, 12, 12, 16
+};
+
 void clear_paper_screen (void) {
 	for (uint16_t num_cell = 0; num_cell < 3096; num_cell++){
 		screen_paper_memory[num_cell] = 0xFF;
@@ -78,7 +102,8 @@ void draw_char (uint16_t x_value, uint16_t y_value, uint8_t ascii) {
 } 
 
 #define SCREEN_X_SIZE 172
-#define CHAR_NOT_WITHOUT_FOR_SCREEN (((SCREEN_X_SIZE - (num_ch * pFont->Width)) & 0xFFFF) >= pFont->Width)
+//#define CHAR_NOT_WITHOUT_FOR_SCREEN (((SCREEN_X_SIZE - (num_ch * pFont->Width)) & 0xFFFF) >= pFont->Width)
+#define CHAR_NOT_WITHOUT_FOR_SCREEN ( (x_value + pFont->Width) <= SCREEN_X_SIZE )
 void draw_string  (uint16_t x_value, uint16_t y_value, uint8_t * text) {
 	uint16_t 
 		size = 0,
@@ -112,6 +137,242 @@ void fill_rectangle (uint16_t x_value, uint16_t y_value, uint16_t width, uint16_
 			write_pixel(x_value + num_v_line, y_value + num_h_line, color);
 		}
 	
+}
+
+#define CHAR_NOT_IN_SCREEN ( (count_x + pFont->Width) <= SCREEN_X_SIZE )
+
+//Основной экран
+uint16_t draw_sysinfo_row(uint16_t y_value, uint8_t length, uint8_t * name, uint8_t * text){
+	uint16_t size=0,
+			 count_y=0,
+			 current_y=0;
+
+	uint8_t rows_name=0,
+			rows_text=0,
+			max_rows;
+	uint8_t * ptr = name;
+
+	if (y_value<4*pFont->Height)
+		return 0;
+	else
+		current_y=y_value-4*pFont->Height;
+
+	while (*ptr++) size++;
+	rows_name = size/(length/pFont->Width);
+	if ((size%(length/pFont->Width))==0) rows_name--;
+	ptr = text;
+	size=0;
+	while (*ptr++) size++;
+	rows_text = size/((172-length)/pFont->Width);
+	if ((size%((172-length)/pFont->Width))==0) rows_text--;
+	if (rows_name>=rows_text) max_rows=rows_name; else max_rows=rows_text;
+	if (current_y<4*pFont->Height*max_rows)
+		return 0;
+	else {
+		count_y=current_y-4*pFont->Height*max_rows;
+	}
+	draw_string_fix_len(2, current_y, length, name);
+	draw_string_fix_len(length+2, current_y, 170-length, text);
+	draw_h_line(0, count_y+1 , 172);
+	draw_v_line(length+1, count_y+1 , y_value-count_y);
+	draw_v_line(0, count_y+1 , y_value-count_y);
+	draw_v_line(171, count_y+1 , y_value-count_y);
+
+	//if (count_y<4*pFont->Height)
+		return count_y;
+	//else
+	//	return count_y-4*pFont->Height;
+
+}
+
+void draw_sys_info(){
+	uint16_t y_value=57;
+	draw_string(48, 58, &"System info");
+	draw_h_line(0, 57 , 172);
+
+	while (y_value>0){
+		//сделать запрос на получение ячейки Name и Value
+		y_value=draw_sysinfo_row(y_value, 92, info_names[current_info_row], info_values[current_info_row]);
+		if (y_value>0){
+			current_info_row++;
+			if (current_info_row==MAX_INFO_ROWS_NUM) {
+				current_info_row=0;
+				break;
+			}
+		}
+	}
+}
+
+//Второстепенные экраны
+void draw_parametr_screen(){
+	uint16_t size=0;
+	uint8_t * ptr = info_names[current_parametr_screen];
+	while (*ptr++) size++;
+	if (size <=15) {
+		set_font(16);
+		draw_string_centre_align(86, 50, info_names[current_parametr_screen]);
+	}
+	else {
+		set_font(12);
+		draw_string_fix_len(1, 60, 170, info_names[current_parametr_screen]);
+	}
+	/*
+	set_font(info_note_fonts[current_parametr_screen]);
+	if (info_note_fonts[current_parametr_screen]==16)
+		draw_string_centre_align(86, 50, info_names[current_parametr_screen]);
+	else if (info_note_fonts[current_parametr_screen]==12)
+		draw_string_fix_len(1, 60, 170, info_names[current_parametr_screen]);
+	*/
+	set_font(16);
+	draw_string_centre_align(86, 25, info_values[current_parametr_screen]);
+
+	set_font(12);
+	draw_string_fix_len(2, 11, 165, info_note[current_parametr_screen]);
+
+	//menu line
+	draw_h_line(0, 24 , 172);
+	draw_h_line(0, 48 , 172);
+
+	//circuit
+	draw_h_line(0, 0 , 172);
+	draw_h_line(0, 71 , 172);
+	draw_v_line(0, 0 , 72);
+	draw_v_line(171, 0 , 72);
+
+	current_parametr_screen++;
+	if (current_parametr_screen==MAX_INFO_ROWS_NUM) current_parametr_screen=0;
+
+}
+
+void draw_confirm_param_screen(){
+
+	uint16_t size=0;
+	uint8_t * ptr = info_names[0];
+	while (*ptr++) size++;
+	if (size <=15) {
+		set_font(16);
+		draw_string_centre_align(86, 50, info_names[0]);
+	}
+	else {
+		set_font(12);
+		draw_string_fix_len(1, 60, 170, info_names[0]);
+	}
+	set_font(12);
+	draw_string_centre_align(86, 35, &"Confirm?");
+	draw_string_centre_align(86, 22, &"You want to set: 4");
+	draw_string_centre_align(86, 9, &"Limits: 3.3-12");
+
+	//menu line
+	draw_h_line(0, 48 , 172);
+
+	//circuit
+	draw_h_line(0, 0 , 172);
+	draw_h_line(0, 71 , 172);
+	draw_v_line(0, 0 , 72);
+	draw_v_line(171, 0 , 72);
+
+}
+
+void draw_apply_param_screen(){
+
+	uint16_t size=0;
+	uint8_t * ptr = info_names[0];
+	while (*ptr++) size++;
+	if (size <=15) {
+		set_font(16);
+		draw_string_centre_align(86, 50, info_names[0]);
+	}
+	else {
+		set_font(12);
+		draw_string_fix_len(1, 60, 170, info_names[0]);
+	}
+	set_font(12);
+	draw_string_centre_align(86, 35, &"You set: 4");
+
+	//menu line
+	draw_h_line(0, 48 , 172);
+
+	//circuit
+	draw_h_line(0, 0 , 172);
+	draw_h_line(0, 71 , 172);
+	draw_v_line(0, 0 , 72);
+	draw_v_line(171, 0 , 72);
+
+}
+
+void draw_undo_param_screen(){
+
+	uint16_t size=0;
+	uint8_t * ptr = info_names[0];
+	while (*ptr++) size++;
+	if (size <=15) {
+		set_font(16);
+		draw_string_centre_align(86, 50, info_names[0]);
+	}
+	else {
+		set_font(12);
+		draw_string_fix_len(1, 60, 170, info_names[0]);
+	}
+	set_font(12);
+	draw_string_centre_align(86, 35, &"Impossible to set: 4");
+
+	//menu line
+	draw_h_line(0, 48 , 172);
+
+	//circuit
+	draw_h_line(0, 0 , 172);
+	draw_h_line(0, 71 , 172);
+	draw_v_line(0, 0 , 72);
+	draw_v_line(171, 0 , 72);
+
+}
+
+//Вывод строк в фиксированную длинну
+void draw_string_fix_len  (uint16_t x_value, uint16_t y_value, uint8_t length, uint8_t * text){
+	uint16_t
+		num_ch = 0,
+		count_x=x_value,
+		count_y=y_value;
+
+	uint8_t current_line=1,
+			max_char_str=length/pFont->Width;
+
+	while (*text != 0){
+		if ( (num_ch==max_char_str*current_line) || (*text==10) ){
+			count_x=x_value;
+			count_y=y_value-4*pFont->Height*current_line;
+			current_line++;
+		}
+		if (*text!=10 && *text!=9) {
+			draw_char(count_x, count_y, *text);
+			count_x += pFont->Width;
+			num_ch++;
+		}
+		if (*text==9) count_x=83;
+		text++;
+	}
+}
+
+//Вывод строки выровненной по центру
+void draw_string_centre_align  (uint16_t x_value, uint16_t y_value, uint8_t * text) {
+	uint16_t
+		size = 0,
+		num_ch = 0,
+		count_x;
+	uint8_t * ptr = text;
+	while (*ptr++) size++;
+
+	if (x_value > ((size/2)*pFont->Width)){
+		count_x=x_value-(size/2)*pFont->Width;
+	}
+	else count_x=1;
+
+	while ((*text != 0) &  CHAR_NOT_WITHOUT_FOR_SCREEN){
+		draw_char(count_x, y_value, *text);
+		count_x += pFont->Width;
+		text++;
+		num_ch++;
+	}
 }
 
 

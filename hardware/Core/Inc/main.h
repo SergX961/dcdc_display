@@ -32,7 +32,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "paper_screen.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -54,7 +54,7 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+extern uint16_t adc;
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -68,6 +68,7 @@ void Error_Handler(void);
 #define MCO_GPIO_Port GPIOH
 #define B1_Pin GPIO_PIN_0
 #define B1_GPIO_Port GPIOA
+#define B1_EXTI_IRQn EXTI0_1_IRQn
 #define MFX_WAKEUP_Pin GPIO_PIN_1
 #define MFX_WAKEUP_GPIO_Port GPIOA
 #define LD_R_Pin GPIO_PIN_5
@@ -113,7 +114,6 @@ void Error_Handler(void);
 #define MFX_I2C_SDA_Pin GPIO_PIN_9
 #define MFX_I2C_SDA_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
-
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
