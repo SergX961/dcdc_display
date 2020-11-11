@@ -17,7 +17,6 @@
   ******************************************************************************
   */
 /* USER CODE END Header */
-
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "adc.h"
@@ -152,18 +151,10 @@ int main(void)
 	//draw_string_fix_len(30, 25, 0, &"STR12222222");
 	display_screen();
 	HAL_ADCEx_Calibration_Start(&hadc, 0);
-	//HAL_ADC_Start_IT(&hadc);
-	HAL_ADC_Start_DMA(&hadc, (uint16_t*)&adc, 1);
 
-
-	          //HAL_ADC_PollForConversion(&hadc, 100); // ожидаем окончания преобразования
-	          //adc = HAL_ADC_GetValue(&hadc); // читаем полученное значение в переменную adc
-	          //HAL_ADC_Stop(&hadc);
-
-	HAL_TIM_Base_Start_IT(&htim6);
-//	HAL_Delay(5000);
-
-  // for debug // END
+//temp for adc keyboard // keyboard_init ?) in future in keyboard_core.c
+	HAL_ADC_Start_DMA(&hadc, (uint32_t*)&adc, 1);
+	HAL_TIM_Base_Start(&htim6);
 
   /* USER CODE END 2 */
 
@@ -172,7 +163,7 @@ int main(void)
   while (1)
   {
 	  flag=0;
-	  if (adc>1000){
+	  if (adc>1000) {
 		//flag=0;
 		uint8_t str[20];
 		sprintf(str, "Screen %d", adc);
@@ -201,7 +192,8 @@ void SystemClock_Config(void)
   /** Configure the main internal regulator output voltage
   */
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-  /** Initializes the CPU, AHB and APB busses clocks
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_HSI48;
   RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
@@ -214,7 +206,7 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  /** Initializes the CPU, AHB and APB busses clocks
+  /** Initializes the CPU, AHB and APB buses clocks
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
