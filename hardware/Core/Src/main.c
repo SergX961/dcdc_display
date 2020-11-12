@@ -31,7 +31,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "paper_screen.h";
+#include "keyboard.h";
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -76,9 +77,9 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc_var)
 		clear_paper_screen();
 		draw_string(20, 50, str);
 		display_screen();
-*/
-		if (adc>1000)
-			flag=1;
+*/		add_key_value(adc);
+		//if (adc>10000)
+		//	flag=1;
 
 	}
 	//HAL_TIM_Base_Stop_IT(&htim6);
@@ -163,7 +164,7 @@ int main(void)
   while (1)
   {
 	  flag=0;
-	  if (adc>1000) {
+	  if (adc>10000) {
 		//flag=0;
 		uint8_t str[20];
 		sprintf(str, "Screen %d", adc);

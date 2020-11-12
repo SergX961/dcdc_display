@@ -35,12 +35,12 @@
 		<link>
 			<name>inc</name>
 			<type>2</type>
-			<location>H:/Projects/dcdc_display/software/inc</location>
+			<location>D:/Paper_screen/dcdc_display/software/inc</location>
 		</link>
 		<link>
 			<name>src</name>
 			<type>2</type>
-			<location>H:/Projects/dcdc_display/software/src</location>
+			<location>D:/Paper_screen/dcdc_display/software/src</location>
 		</link>
 	</linkedResources>
 </projectDescription>
