@@ -18,7 +18,7 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include "../../inc/paper_screen/fontsepd.h"
+#include "fontsepd.h"
 
 /** @addtogroup BSP
   * @{

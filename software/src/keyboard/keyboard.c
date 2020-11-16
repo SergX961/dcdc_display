@@ -1,5 +1,5 @@
 #include "keyboard_internal.h"
-#include "stdint.h";
+#include "stdint.h"
 
 uint16_t  key_limits[12][2] = {
 		{1975, 2055}, //0

@@ -31,8 +31,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "paper_screen.h";
-#include "keyboard.h";
+#include "paper_screen.h"
+#include "keyboard.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -125,10 +125,8 @@ int main(void)
   MX_ADC_Init();
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
-
-	gde021a1_Init();
-	gde021a1_Init(); //why need 2 init?!
-
+  BSP_EPD_Init();
+  gde021a1_Init();
   // for debug // BEGIN
 /*
 	#define BLACK 0
@@ -145,11 +143,11 @@ int main(void)
 	//draw_main_screen();
 	//draw_menu_parametr_screen();
 	clear_paper_screen();
-	draw_confirm_param_screen();
+//	draw_confirm_param_screen();
 
-	//draw_string_fix_len(30, 1, 0, &"STR1");
-	//draw_string_fix_len(30, 13, 0, &"STR11111");
-	//draw_string_fix_len(30, 25, 0, &"STR12222222");
+//	draw_string_fix_len(30, 1, 0, &"STR1");
+//	draw_string_fix_len(30, 13, 0, &"STR11111");
+//	draw_string_fix_len(30, 25, 0, &"STR12222222");
 	display_screen();
 	HAL_ADCEx_Calibration_Start(&hadc, 0);
 
