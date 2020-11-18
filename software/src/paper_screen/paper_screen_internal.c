@@ -2,6 +2,7 @@
 #include "../../inc/paper_screen/paper_screen.h"
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "../../inc/paper_screen/fontsepd.h"
 #include "../../../hardware/Drivers/BSP/Components/Common/epd.h"
@@ -151,12 +152,12 @@ uint16_t draw_sysinfo_row(uint16_t y_value, uint8_t length, uint8_t * name, uint
 			rows_text=0,
 			max_rows;
 	uint8_t * ptr = name;
-
+	//проверяем влезет или нет хотябы одна строка по вертикали
 	if (y_value<4*pFont->Height)
 		return 0;
 	else
 		current_y=y_value-4*pFont->Height;
-
+	//расчет количества необходимых строк
 	while (*ptr++) size++;
 	rows_name = size/(length/pFont->Width);
 	if ((size%(length/pFont->Width))==0) rows_name--;
@@ -165,6 +166,7 @@ uint16_t draw_sysinfo_row(uint16_t y_value, uint8_t length, uint8_t * name, uint
 	while (*ptr++) size++;
 	rows_text = size/((172-length)/pFont->Width);
 	if ((size%((172-length)/pFont->Width))==0) rows_text--;
+
 	if (rows_name>=rows_text) max_rows=rows_name; else max_rows=rows_text;
 	if (current_y<4*pFont->Height*max_rows)
 		return 0;
@@ -204,17 +206,18 @@ void draw_sys_info(){
 }
 
 //Второстепенные экраны
-void draw_parametr_screen(){
+void draw_parametr_screen(uint8_t * name, uint8_t * value, uint8_t * note){
 	uint16_t size=0;
-	uint8_t * ptr = info_names[current_parametr_screen];
+	//uint8_t * ptr = info_names[current_parametr_screen];
+	uint8_t * ptr = name;
 	while (*ptr++) size++;
 	if (size <=15) {
 		set_font(16);
-		draw_string_centre_align(86, 50, info_names[current_parametr_screen]);
+		draw_string_centre_align(86, 50, name);
 	}
 	else {
 		set_font(12);
-		draw_string_fix_len(1, 60, 170, info_names[current_parametr_screen]);
+		draw_string_fix_len(1, 60, 170, name);
 	}
 	/*
 	set_font(info_note_fonts[current_parametr_screen]);
@@ -224,10 +227,12 @@ void draw_parametr_screen(){
 		draw_string_fix_len(1, 60, 170, info_names[current_parametr_screen]);
 	*/
 	set_font(16);
-	draw_string_centre_align(86, 25, info_values[current_parametr_screen]);
+	//draw_string_centre_align(86, 25, info_values[current_parametr_screen]);
+	draw_string_centre_align(86, 25, value);
 
 	set_font(12);
-	draw_string_fix_len(2, 11, 165, info_note[current_parametr_screen]);
+	//draw_string_fix_len(2, 11, 165, info_note[current_parametr_screen]);
+	draw_string_fix_len(2, 11, 165, note);
 
 	//menu line
 	draw_h_line(0, 24 , 172);
@@ -239,28 +244,34 @@ void draw_parametr_screen(){
 	draw_v_line(0, 0 , 72);
 	draw_v_line(171, 0 , 72);
 
-	current_parametr_screen++;
-	if (current_parametr_screen==MAX_INFO_ROWS_NUM) current_parametr_screen=0;
+	//current_parametr_screen++;
+	//if (current_parametr_screen==MAX_INFO_ROWS_NUM) current_parametr_screen=0;
 
 }
 
-void draw_confirm_param_screen(){
+void draw_confirm_param_screen(uint8_t * name, uint8_t * note, uint8_t * value){
 
 	uint16_t size=0;
-	uint8_t * ptr = info_names[0];
+	//uint8_t * ptr = info_names[0];
+	uint8_t * ptr = name;
 	while (*ptr++) size++;
 	if (size <=15) {
 		set_font(16);
-		draw_string_centre_align(86, 50, info_names[0]);
+		draw_string_centre_align(86, 50, name);
 	}
 	else {
 		set_font(12);
-		draw_string_fix_len(1, 60, 170, info_names[0]);
+		draw_string_fix_len(1, 60, 170, name);
 	}
 	set_font(12);
+
+	uint8_t str[30];
+	sprintf(str, "You want to set: %d%d%d", *value, *(value+1), *(value+2));
+
 	draw_string_centre_align(86, 35, &"Confirm?");
-	draw_string_centre_align(86, 22, &"You want to set: 4");
-	draw_string_centre_align(86, 9, &"Limits: 3.3-12");
+	draw_string_centre_align(86, 22, str);
+	//draw_string_centre_align(86, 9, &"Limits: 3.3-12");
+	draw_string_fix_len(2, 9, 165, note);
 
 	//menu line
 	draw_h_line(0, 48 , 172);
@@ -327,6 +338,16 @@ void draw_undo_param_screen(){
 
 }
 
+//разбивка строки на слова
+void cut_string_by_word(uint8_t length, uint8_t * text){
+	uint16_t size;
+	uint8_t * ptr = text;
+	while (*ptr++) size++;
+	uint8_t cutting_string[size+1];
+	strcpy(cutting_string, text);
+
+}
+
 //Вывод строк в фиксированную длинну
 void draw_string_fix_len  (uint16_t x_value, uint16_t y_value, uint8_t length, uint8_t * text){
 	uint16_t
@@ -352,6 +373,8 @@ void draw_string_fix_len  (uint16_t x_value, uint16_t y_value, uint8_t length, u
 		text++;
 	}
 }
+
+
 
 //Вывод строки выровненной по центру
 void draw_string_centre_align  (uint16_t x_value, uint16_t y_value, uint8_t * text) {

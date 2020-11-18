@@ -53,7 +53,6 @@
 
 /* USER CODE BEGIN PV */
 uint16_t adc = 0;
-volatile uint8_t flag = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -68,23 +67,10 @@ void SystemClock_Config(void);
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc_var)
 {
 	if(hadc_var->Instance == ADC1){
-
-		//adc=HAL_ADC_GetValue(hadc_var);
-/*
-		uint8_t str[20];
-		sprintf(str, "Screen %d", adc);
-		adc=0;
-		clear_paper_screen();
-		draw_string(20, 50, str);
-		display_screen();
-*/		add_key_value(adc);
-		//if (adc>10000)
-		//	flag=1;
-
+		add_key_value(adc);
 	}
-	//HAL_TIM_Base_Stop_IT(&htim6);
-	//HAL_ADC_Stop(hadc_var);
 }
+
 /* USER CODE END 0 */
 
 /**
@@ -130,30 +116,11 @@ int main(void)
 	gde021a1_Init(); //why need 2 init?!
 
   // for debug // BEGIN
-/*
-	#define BLACK 0
-	clear_paper_screen();
-	set_font(12);
-	/*uint8_t string[] = "V.1 memory display";
-	draw_string(20, 50, string);
-	draw_h_line(0, 40 , 172);
-	draw_rectangle(15, 45, 140, 20);
-	fill_rectangle(10, 10, 152, 10, BLACK);
-
-	display_screen();
-	*/
-	//draw_main_screen();
-	//draw_menu_parametr_screen();
-	clear_paper_screen();
-	draw_confirm_param_screen();
-
-	//draw_string_fix_len(30, 1, 0, &"STR1");
-	//draw_string_fix_len(30, 13, 0, &"STR11111");
-	//draw_string_fix_len(30, 25, 0, &"STR12222222");
-	display_screen();
+	draw_main_screen();
 	HAL_ADCEx_Calibration_Start(&hadc, 0);
 
 //temp for adc keyboard // keyboard_init ?) in future in keyboard_core.c
+	keyboard_init();
 	HAL_ADC_Start_DMA(&hadc, (uint32_t*)&adc, 1);
 	HAL_TIM_Base_Start(&htim6);
 
@@ -163,16 +130,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  flag=0;
-	  if (adc>10000) {
-		//flag=0;
-		uint8_t str[20];
-		sprintf(str, "Screen %d", adc);
-		//adc=0;
-		clear_paper_screen();
-		draw_string(20, 50, str);
-		display_screen();
-	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -234,6 +191,27 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
+
+/**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM2 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM2) {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.

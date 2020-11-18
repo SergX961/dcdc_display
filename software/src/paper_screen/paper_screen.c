@@ -46,9 +46,22 @@ void draw_main_screen (void) {
 	display_screen();
 } 
 
-void draw_menu_parametr_screen (void) {
+void draw_menu_parametr_screen (uint8_t direction) {
 	clear_paper_screen();
-	draw_parametr_screen();
+
+
+	if (direction==1){
+		current_parametr_screen++;
+		if (current_parametr_screen==MAX_INFO_ROWS_NUM) current_parametr_screen=0;
+	}
+	else if (direction==2){
+		if (current_parametr_screen==0)
+			current_parametr_screen=MAX_INFO_ROWS_NUM-1;
+		else
+			current_parametr_screen--;
+	}
+
+	draw_parametr_screen(info_names[current_parametr_screen], info_values[current_parametr_screen], info_note[current_parametr_screen]);
 	/*
 	set_font(16);
 	draw_string(15, 50, &"<- CURRENT ->");
@@ -73,4 +86,14 @@ void draw_menu_parametr_screen (void) {
 	draw_v_line(171, 0 , 72);
 */
 	display_screen();
+}
+
+void draw_change_parametr_screen(uint8_t * value){
+	clear_paper_screen();
+	draw_confirm_param_screen(info_names[current_parametr_screen], info_note[current_parametr_screen], value);
+	display_screen();
+}
+
+void set_info_value(uint8_t * value){
+	sprintf(info_values[current_parametr_screen], '%s', value);
 }
