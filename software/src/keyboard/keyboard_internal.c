@@ -1,6 +1,6 @@
 #include "keyboard_internal.h"
-//#include "paper_screen_internal.h";
 #include "paper_screen.h";
+#include <stdio.h>
 
 uint8_t key_pressed_flag=0;
 uint8_t screen_mode;
@@ -89,7 +89,7 @@ void to_input_screen(uint8_t param){
 	set_screen_mode(2);
 }
 
-void check_key_pressed(){
+void check_key_pressed (void) {
 	if ( (key_buff[0]==key_buff[1])&&(key_buff[1]==key_buff[2])&&(key_buff[0]!=12) ){
 		if (key_pressed_flag==0) {
 			on_key_pressed(key_buff[0]);
@@ -100,11 +100,9 @@ void check_key_pressed(){
 		key_pressed_flag=0;
 }
 
-void on_key_pressed(uint8_t key){
+void on_key_pressed (uint8_t key) {
 	if (key<10){
 		key_func[key](key);
-
-
 	}
 	else if (key==10){
 		key_func[10](key);

@@ -2,7 +2,7 @@
 #define _KEYBOARD_INTERNAL_H_
 
 #include "keyboard.h"
-#include "stdint.h";
+#include "stdint.h"
 
 extern void (* key_func[12])(uint8_t param);
 extern uint8_t input_value[3];

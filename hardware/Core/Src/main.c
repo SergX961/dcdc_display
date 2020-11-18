@@ -31,8 +31,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "paper_screen.h";
-#include "keyboard.h";
+#include "paper_screen.h"
+#include "keyboard.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -111,10 +111,8 @@ int main(void)
   MX_ADC_Init();
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
-
-	gde021a1_Init();
-	gde021a1_Init(); //why need 2 init?!
-
+  BSP_EPD_Init();
+  gde021a1_Init();
   // for debug // BEGIN
 	draw_main_screen();
 	HAL_ADCEx_Calibration_Start(&hadc, 0);
