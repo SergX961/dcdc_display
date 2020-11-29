@@ -21,9 +21,9 @@ uint8_t current_info_row = 0;
 uint32_t current_parametr_screen = 0;
 
 
-//#ifdef EPD_TESTS
+
 uint8_t screen_paper_memory[3096] = {0};
-//#endif
+
 uint8_t info_names[MAX_INFO_ROWS_NUM][30] = {
 		"Voltage cut", "Charging type", "Charge threshold Pb lower", "Charge threshold Pb upper",
 		"Charge threshold others", "Discharge threshold", "Quantity cans", "Capacity",
@@ -47,7 +47,9 @@ uint8_t info_note_fonts[MAX_INFO_ROWS_NUM] = {
 void clear_paper_screen (void) {
 	for (uint16_t num_cell = 0; num_cell < 3096; num_cell++){
 		screen_paper_memory[num_cell] = 0xFF;
-	}}
+	}
+}
+
 void write_pixel (uint16_t x_value, uint16_t y_value, uint8_t color) {
 	if (x_value >= 172 || y_value >= 72)
 		return;
@@ -497,17 +499,17 @@ extern EPD_DrvTypeDef gde021a1_drv;
 #define EPD_BUSY_GPIO_PORT GPIOA
 
 void display_screen (void)  {
-  gde021a1_drv.SetDisplayWindow(0, 0, 171, 17);
+ gde021a1_drv.SetDisplayWindow(0, 0, 171, 17);
 
-  for(uint32_t index = 0; index < 3096; index++)
-  {
+ for(uint32_t index = 0; index < 3096; index++)
+ {
 	  gde021a1_drv.WritePixel(screen_paper_memory[index]);
-  }
+ }
 
-  gde021a1_drv.RefreshDisplay();
-  while (HAL_GPIO_ReadPin(EPD_BUSY_GPIO_PORT, EPD_BUSY_PIN) != (uint16_t)RESET);
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_SET);
-  for (uint32_t i=0; i<100000; i++);
+ gde021a1_drv.RefreshDisplay();
+ while (HAL_GPIO_ReadPin(EPD_BUSY_GPIO_PORT, EPD_BUSY_PIN) != (uint16_t)RESET);
+ HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_SET);
+ for (uint32_t i=0; i<100000; i++);
 }
 
 #else

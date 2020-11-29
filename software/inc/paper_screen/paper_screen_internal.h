@@ -36,6 +36,7 @@ uint8_t * cut_string_by_word (uint8_t length, uint8_t * text);
 uint8_t  rows_count (uint8_t length, uint8_t * text);
 void draw_string_fix_len  (uint16_t x_value, uint16_t y_value, uint8_t length, uint8_t * source_text);
 uint8_t draw_string_fix_len_centre_align  (uint16_t x_value, uint16_t y_value, uint8_t length, uint8_t * source_text);
+void draw_string_centre_align  (uint16_t x_value, uint16_t y_value, uint8_t * text);
 
 void draw_sys_info (void);
 void draw_parametr_screen (uint8_t * name, uint8_t * value, uint8_t * note);
