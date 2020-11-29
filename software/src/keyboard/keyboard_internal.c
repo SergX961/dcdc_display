@@ -1,5 +1,5 @@
 #include "keyboard_internal.h"
-#include "paper_screen.h";
+#include "paper_screen.h"
 #include <stdio.h>
 
 uint8_t key_pressed_flag=0;
@@ -9,38 +9,31 @@ uint8_t input_value[3]={0,0,0};
 uint8_t value_index=0;
 
 //eampty func
-void eampty_key(uint8_t param){
+void eampty_key (uint8_t param){
 
 }
 //обработка простого нажатия на цифру
-void digit_key(uint8_t param){
+void digit_key (uint8_t param){
 	uint8_t str[20];
-	sprintf(str, "Key - %d", param);
+	sprintf((char *)str, "Key - %d", param);
 
 	if (value_index<3){
 		input_value[value_index]=param;
 		value_index++;
 	}
-	//clear_paper_screen();
-	//draw_string(20, 50, str);
 	draw_change_parametr_screen(input_value);
-	//display_screen();
 }
 
-void enter_key(uint8_t param){
-	//info_values[current_parametr_screen]={input_value[0], input_value[1], input_value[2], '\0'};
-	uint8_t ret_value[20];
+void enter_key (uint8_t param){
+	uint8_t ret_value[3];
 	if (value_index==1){
-		//sprintf(info_values[current_parametr_screen], "%d",input_value[0]);
-		sprintf(ret_value, "%d",input_value[0]);
+		sprintf((char *)ret_value, "%d",input_value[0]);
 	}
 	else if (value_index==2){
-		//sprintf(info_values[current_parametr_screen], "%d%d",input_value[0], input_value[1]);
-		sprintf(ret_value, "%d%d",input_value[0], input_value[1]);
+		sprintf((char *)ret_value, "%d%d",input_value[0], input_value[1]);
 	}
 	else if (value_index==3){
-		//sprintf(info_values[current_parametr_screen], "%d%d%d",input_value[0], input_value[1], input_value[2]);
-		sprintf(ret_value, "%d%d%d",input_value[0], input_value[1], input_value[2]);
+		sprintf((char *)ret_value, "%d%d%d",input_value[0], input_value[1], input_value[2]);
 	}
 	set_info_value(ret_value);
 	input_value[0]=0;
@@ -49,7 +42,7 @@ void enter_key(uint8_t param){
 	value_index=0;
 	set_screen_mode(1);
 }
-void cancel_key(uint8_t param){
+void cancel_key (uint8_t param){
 	input_value[0]=0;
 	input_value[1]=0;
 	input_value[2]=0;
@@ -58,17 +51,13 @@ void cancel_key(uint8_t param){
 }
 
 //отображение основного экрана
-void draw_sys_info_key(uint8_t param){
-	//clear_paper_screen();
-	//draw_sys_info();
-	//display_screen();
-
+void draw_sys_info_key (uint8_t param){
 	draw_main_screen();
 
 }
 
 //отображение побочного экрана
-void change_parametr_screen(uint8_t param){
+void change_parametr_screen (uint8_t param){
 	if (param==4){
 		draw_menu_parametr_screen(2);
 	}
@@ -78,26 +67,15 @@ void change_parametr_screen(uint8_t param){
 }
 
 //смена режима Основной\Второстепенный экран
-void change_screen_mode(uint8_t param){
+void change_screen_mode (uint8_t param){
 	if (screen_mode==0)
 		set_screen_mode(1);
 	else if (screen_mode==1)
 		set_screen_mode(0);
 }
 
-void to_input_screen(uint8_t param){
+void to_input_screen (uint8_t param){
 	set_screen_mode(2);
-}
-
-void check_key_pressed (void) {
-	if ( (key_buff[0]==key_buff[1])&&(key_buff[1]==key_buff[2])&&(key_buff[0]!=12) ){
-		if (key_pressed_flag==0) {
-			on_key_pressed(key_buff[0]);
-		}
-		key_pressed_flag=1;
-	}
-	else
-		key_pressed_flag=0;
 }
 
 void on_key_pressed (uint8_t key) {
@@ -113,7 +91,7 @@ void on_key_pressed (uint8_t key) {
 
 }
 
-void set_screen_mode(uint8_t new_mode){
+void set_screen_mode (uint8_t new_mode){
 	//main screen
 	if (new_mode==0){
 		key_func[0]=eampty_key;
@@ -166,7 +144,18 @@ void set_screen_mode(uint8_t new_mode){
 	screen_mode=new_mode;
 }
 
-void keyboard_internal_init(){
+void check_key_pressed (void) {
+	if ( (key_buff[0]==key_buff[1])&&(key_buff[1]==key_buff[2])&&(key_buff[0]!=12) ){
+		if (key_pressed_flag==0) {
+			on_key_pressed(key_buff[0]);
+		}
+		key_pressed_flag=1;
+	}
+	else
+		key_pressed_flag=0;
+}
+
+void keyboard_internal_init (void){
 	screen_mode=0;
 	key_func[0]=eampty_key;
 	key_func[1]=eampty_key;

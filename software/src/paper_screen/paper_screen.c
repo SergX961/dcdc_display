@@ -1,6 +1,5 @@
 #include "../../inc/paper_screen/paper_screen_internal.h"
-
-uint8_t tim6_counter=0;
+#include "stdio.h"
 
 void draw_main_screen (void) {
 	clear_paper_screen();
@@ -49,7 +48,6 @@ void draw_main_screen (void) {
 void draw_menu_parametr_screen (uint8_t direction) {
 	clear_paper_screen();
 
-
 	if (direction==1){
 		current_parametr_screen++;
 		if (current_parametr_screen==MAX_INFO_ROWS_NUM) current_parametr_screen=0;
@@ -88,12 +86,12 @@ void draw_menu_parametr_screen (uint8_t direction) {
 	display_screen();
 }
 
-void draw_change_parametr_screen(uint8_t * value){
+void draw_change_parametr_screen (uint8_t * value){
 	clear_paper_screen();
 	draw_confirm_param_screen(info_names[current_parametr_screen], info_note[current_parametr_screen], value);
 	display_screen();
 }
 
-void set_info_value(uint8_t * value){
-	sprintf(info_values[current_parametr_screen], '%s', value);
+void set_info_value (uint8_t * value){
+	sprintf(info_values[current_parametr_screen], "%s", value);
 }

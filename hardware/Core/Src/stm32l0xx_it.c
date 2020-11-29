@@ -153,21 +153,21 @@ void EXTI0_1_IRQHandler(void)
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
   /* USER CODE BEGIN EXTI0_1_IRQn 1 */
   if (B1_Pin == GPIO_PIN_0){
-	  /*clear_paper_screen();
+	  clear_paper_screen();
 	  draw_sys_info();
-	  display_screen();*/
+	  display_screen();
 	  //draw_menu_parametr_screen();
 
 	  //HAL_TIM_Base_Start_IT(&htim6);
 	  //HAL_ADC_Start_DMA(&hadc, (uint32_t*)&adc, 1);
-
+	  /*
 		uint8_t str[20];
 		sprintf(str, "Screen %d", adc);
 		//adc=0;
 		clear_paper_screen();
 		draw_string(20, 50, str);
 		display_screen();
-
+		*/
   }
   EXTI->PR|=EXTI_PR_PR0;
   /* USER CODE END EXTI0_1_IRQn 1 */

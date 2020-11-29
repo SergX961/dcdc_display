@@ -20,11 +20,11 @@ uint16_t  key_limits[13][2] = {
 uint8_t key_buff[3]={0,1,2};
 uint8_t key_buff_index=0;
 
-void keyboard_init(){
+void keyboard_init (void){
 	keyboard_internal_init();
 }
 
-void add_key_value(uint16_t key_value)
+void add_key_value (uint16_t key_value)
 {
 	for(uint8_t i=0; i<13; i++){
 		if ( (key_value>=key_limits[i][0])&&(key_value<=key_limits[i][1]) ){

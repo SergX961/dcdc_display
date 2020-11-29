@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "stm32l0538_discovery_epd.h"
 #include "fontsepd.h"
@@ -44,8 +45,9 @@ uint8_t info_note_fonts[MAX_INFO_ROWS_NUM] = {
 };
 
 void clear_paper_screen (void) {
-	BSP_EPD_Clear(0xFF);
-}
+	for (uint16_t num_cell = 0; num_cell < 3096; num_cell++){
+		screen_paper_memory[num_cell] = 0xFF;
+	}}
 void write_pixel (uint16_t x_value, uint16_t y_value, uint8_t color) {
 	if (x_value >= 172 || y_value >= 72)
 		return;
@@ -105,7 +107,7 @@ void draw_char (uint16_t x_value, uint16_t y_value, uint8_t ascii) {
 #define SCREEN_X_SIZE 172
 //#define CHAR_NOT_WITHOUT_FOR_SCREEN (((SCREEN_X_SIZE - (num_ch * pFont->Width)) & 0xFFFF) >= pFont->Width)
 #define CHAR_NOT_WITHOUT_FOR_SCREEN ( (x_value + pFont->Width) <= SCREEN_X_SIZE )
-void draw_string  (uint16_t x_value, uint16_t y_value, uint8_t * text) {
+void draw_string (uint16_t x_value, uint16_t y_value, uint8_t * text) {
 	uint16_t 
 		size = 0,
 		num_ch = 0;
@@ -143,29 +145,22 @@ void fill_rectangle (uint16_t x_value, uint16_t y_value, uint16_t width, uint16_
 #define CHAR_NOT_IN_SCREEN ( (count_x + pFont->Width) <= SCREEN_X_SIZE )
 
 //Основной экран
-uint16_t draw_sysinfo_row(uint16_t y_value, uint8_t length, uint8_t * name, uint8_t * text){
-	uint16_t size=0,
-			 count_y=0,
+uint16_t draw_sysinfo_row (uint16_t y_value, uint8_t length, uint8_t * name, uint8_t * text){
+	uint16_t count_y=0,
 			 current_y=0;
 
 	uint8_t rows_name=0,
 			rows_text=0,
 			max_rows;
-	uint8_t * ptr = name;
 	//проверяем влезет или нет хотябы одна строка по вертикали
 	if (y_value<4*pFont->Height)
 		return 0;
 	else
 		current_y=y_value-4*pFont->Height;
+
 	//расчет количества необходимых строк
-	while (*ptr++) size++;
-	rows_name = size/(length/pFont->Width);
-	if ((size%(length/pFont->Width))==0) rows_name--;
-	ptr = text;
-	size=0;
-	while (*ptr++) size++;
-	rows_text = size/((172-length)/pFont->Width);
-	if ((size%((172-length)/pFont->Width))==0) rows_text--;
+	rows_name=rows_count(length/pFont->Width, name);
+	rows_text=rows_count(length/pFont->Width, text);
 
 	if (rows_name>=rows_text) max_rows=rows_name; else max_rows=rows_text;
 	if (current_y<4*pFont->Height*max_rows)
@@ -173,21 +168,17 @@ uint16_t draw_sysinfo_row(uint16_t y_value, uint8_t length, uint8_t * name, uint
 	else {
 		count_y=current_y-4*pFont->Height*max_rows;
 	}
-	draw_string_fix_len(2, current_y, length, name);
+	draw_string_fix_len_centre_align(2, current_y, length, name);
 	draw_string_fix_len(length+2, current_y, 170-length, text);
 	draw_h_line(0, count_y+1 , 172);
 	draw_v_line(length+1, count_y+1 , y_value-count_y);
 	draw_v_line(0, count_y+1 , y_value-count_y);
 	draw_v_line(171, count_y+1 , y_value-count_y);
 
-	//if (count_y<4*pFont->Height)
-		return count_y;
-	//else
-	//	return count_y-4*pFont->Height;
-
+	return count_y;
 }
 
-void draw_sys_info(){
+void draw_sys_info (void){
 	uint16_t y_value=57;
 	draw_string(48, 58, &"System info");
 	draw_h_line(0, 57 , 172);
@@ -206,9 +197,8 @@ void draw_sys_info(){
 }
 
 //Второстепенные экраны
-void draw_parametr_screen(uint8_t * name, uint8_t * value, uint8_t * note){
+void draw_parametr_screen (uint8_t * name, uint8_t * value, uint8_t * note){
 	uint16_t size=0;
-	//uint8_t * ptr = info_names[current_parametr_screen];
 	uint8_t * ptr = name;
 	while (*ptr++) size++;
 	if (size <=15) {
@@ -217,21 +207,12 @@ void draw_parametr_screen(uint8_t * name, uint8_t * value, uint8_t * note){
 	}
 	else {
 		set_font(12);
-		draw_string_fix_len(1, 60, 170, name);
+		draw_string_fix_len_centre_align(1, 60, 170, name);
 	}
-	/*
-	set_font(info_note_fonts[current_parametr_screen]);
-	if (info_note_fonts[current_parametr_screen]==16)
-		draw_string_centre_align(86, 50, info_names[current_parametr_screen]);
-	else if (info_note_fonts[current_parametr_screen]==12)
-		draw_string_fix_len(1, 60, 170, info_names[current_parametr_screen]);
-	*/
 	set_font(16);
-	//draw_string_centre_align(86, 25, info_values[current_parametr_screen]);
 	draw_string_centre_align(86, 25, value);
 
 	set_font(12);
-	//draw_string_fix_len(2, 11, 165, info_note[current_parametr_screen]);
 	draw_string_fix_len(2, 11, 165, note);
 
 	//menu line
@@ -243,16 +224,11 @@ void draw_parametr_screen(uint8_t * name, uint8_t * value, uint8_t * note){
 	draw_h_line(0, 71 , 172);
 	draw_v_line(0, 0 , 72);
 	draw_v_line(171, 0 , 72);
-
-	//current_parametr_screen++;
-	//if (current_parametr_screen==MAX_INFO_ROWS_NUM) current_parametr_screen=0;
-
 }
 
-void draw_confirm_param_screen(uint8_t * name, uint8_t * note, uint8_t * value){
+void draw_confirm_param_screen (uint8_t * name, uint8_t * note, uint8_t * value){
 
 	uint16_t size=0;
-	//uint8_t * ptr = info_names[0];
 	uint8_t * ptr = name;
 	while (*ptr++) size++;
 	if (size <=15) {
@@ -266,11 +242,10 @@ void draw_confirm_param_screen(uint8_t * name, uint8_t * note, uint8_t * value){
 	set_font(12);
 
 	uint8_t str[30];
-	sprintf(str, "You want to set: %d%d%d", *value, *(value+1), *(value+2));
+	sprintf((char *)str, "You want to set: %d%d%d", *value, *(value+1), *(value+2));
 
 	draw_string_centre_align(86, 35, &"Confirm?");
 	draw_string_centre_align(86, 22, str);
-	//draw_string_centre_align(86, 9, &"Limits: 3.3-12");
 	draw_string_fix_len(2, 9, 165, note);
 
 	//menu line
@@ -284,7 +259,7 @@ void draw_confirm_param_screen(uint8_t * name, uint8_t * note, uint8_t * value){
 
 }
 
-void draw_apply_param_screen(){
+void draw_apply_param_screen (void){
 
 	uint16_t size=0;
 	uint8_t * ptr = info_names[0];
@@ -311,7 +286,7 @@ void draw_apply_param_screen(){
 
 }
 
-void draw_undo_param_screen(){
+void draw_undo_param_screen (void){
 
 	uint16_t size=0;
 	uint8_t * ptr = info_names[0];
@@ -339,17 +314,133 @@ void draw_undo_param_screen(){
 }
 
 //разбивка строки на слова
-void cut_string_by_word(uint8_t length, uint8_t * text){
-	uint16_t size;
-	uint8_t * ptr = text;
+uint8_t * cut_string_by_word (uint8_t length, uint8_t * text){
+	uint16_t size=0,
+			num_ch=0;
+	uint8_t * ptr = text,
+			* gap_ptr,
+			gap_flag=0;
 	while (*ptr++) size++;
-	uint8_t cutting_string[size+1];
-	strcpy(cutting_string, text);
+	uint8_t * buf = calloc(size, sizeof(uint8_t));
+	strcpy((char *)buf, (char *)text);
+	ptr=buf;
+	gap_ptr=buf;
+	while(*buf!=0){
+		if (*buf==32){
+			gap_ptr=buf;
+			gap_flag=1;
+		}
+		if (*buf==10){
+			gap_ptr=buf;
+			num_ch=0;
+			gap_flag=0;
+		}
+
+		if (num_ch==length){
+			num_ch=0;
+			if (gap_flag==1){
+				buf=gap_ptr;
+				*buf=10;
+				gap_flag=0;
+			}
+		}
+		else
+			num_ch++;
+		buf++;
+	}
+	return ptr;
 
 }
 
-//Вывод строк в фиксированную длинну
-void draw_string_fix_len  (uint16_t x_value, uint16_t y_value, uint8_t length, uint8_t * text){
+uint8_t  rows_count (uint8_t length, uint8_t * text){
+	uint16_t num_ch=0;
+	uint8_t * gap_ptr = text,
+			* buf = text,
+			rows_cnt=0,
+			gap_flag=0;
+
+	while(*buf!=0){
+		if (*buf==32){
+			gap_ptr=buf;
+			gap_flag=1;
+		}
+		if (*buf==10){
+			gap_ptr=buf;
+			num_ch=0;
+			rows_cnt++;
+			gap_flag=0;
+		}
+		if (num_ch==length){
+			num_ch=0;
+			rows_cnt++;
+			if (gap_flag==1){
+				buf=gap_ptr;
+				gap_flag=0;
+			}
+		}
+		else
+			num_ch++;
+		buf++;
+	}
+	return rows_cnt;
+
+}
+
+//Вывод строк в фиксированную длинну с центровкой
+uint8_t draw_string_fix_len_centre_align  (uint16_t x_value, uint16_t y_value, uint8_t length, uint8_t * source_text){
+	uint16_t
+		num_ch = 0,
+		count_x=x_value,
+		count_y=y_value;
+
+	uint8_t current_line=0,
+			* ptr,
+			max_char_str=length/pFont->Width;
+
+	uint8_t * text=cut_string_by_word(max_char_str, source_text);
+	ptr=text;
+
+	while (*text != 0){
+		if ( (num_ch==max_char_str) || (*text==10) ){
+			count_x=x_value+((length-num_ch*pFont->Width)/2);
+			count_y=y_value-4*pFont->Height*current_line;
+			current_line++;
+
+			for (uint8_t i=0; i<num_ch; i++){
+				if (*ptr!=10 && *ptr!=9) {
+					draw_char(count_x, count_y, *ptr);
+					count_x += pFont->Width;
+					ptr++;
+				}
+
+			}
+			num_ch=0;
+			if (*text==10) {
+				text++;
+				ptr++;
+			}
+		}
+		else {
+			num_ch++;
+			text++;
+		}
+	}
+	count_x=x_value+((length-num_ch*pFont->Width)/2);
+	count_y=y_value-4*pFont->Height*current_line;
+
+	for (uint8_t i=0; i<num_ch; i++){
+		if (*ptr!=10 && *ptr!=9) {
+			draw_char(count_x, count_y, *ptr);
+			count_x += pFont->Width;
+			ptr++;
+		}
+
+	}
+
+	return current_line;
+}
+
+void draw_string_fix_len  (uint16_t x_value, uint16_t y_value, uint8_t length, uint8_t * source_text){
 	uint16_t
 		num_ch = 0,
 		count_x=x_value,
@@ -357,6 +448,7 @@ void draw_string_fix_len  (uint16_t x_value, uint16_t y_value, uint8_t length, u
 
 	uint8_t current_line=1,
 			max_char_str=length/pFont->Width;
+	uint8_t * text=cut_string_by_word(max_char_str, source_text);
 
 	while (*text != 0){
 		if ( (num_ch==max_char_str*current_line) || (*text==10) ){
@@ -373,8 +465,6 @@ void draw_string_fix_len  (uint16_t x_value, uint16_t y_value, uint8_t length, u
 		text++;
 	}
 }
-
-
 
 //Вывод строки выровненной по центру
 void draw_string_centre_align  (uint16_t x_value, uint16_t y_value, uint8_t * text) {
@@ -407,18 +497,17 @@ extern EPD_DrvTypeDef gde021a1_drv;
 #define EPD_BUSY_GPIO_PORT GPIOA
 
 void display_screen (void)  {
-	BSP_EPD_RefreshDisplay();
-//  gde021a1_drv.SetDisplayWindow(0, 0, 171, 17);
-//
-//  for(uint32_t index = 0; index < 3096; index++)
-//  {
-//	  gde021a1_drv.WritePixel(screen_paper_memory[index]);
-//  }
-//
-//  gde021a1_drv.RefreshDisplay();
-//  while (HAL_GPIO_ReadPin(EPD_BUSY_GPIO_PORT, EPD_BUSY_PIN) != (uint16_t)RESET);
-//  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_SET);
-//  for (uint32_t i=0; i<100000; i++);
+  gde021a1_drv.SetDisplayWindow(0, 0, 171, 17);
+
+  for(uint32_t index = 0; index < 3096; index++)
+  {
+	  gde021a1_drv.WritePixel(screen_paper_memory[index]);
+  }
+
+  gde021a1_drv.RefreshDisplay();
+  while (HAL_GPIO_ReadPin(EPD_BUSY_GPIO_PORT, EPD_BUSY_PIN) != (uint16_t)RESET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_SET);
+  for (uint32_t i=0; i<100000; i++);
 }
 
 #else
