@@ -24,6 +24,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "adc.h"
+#include <paper_screen.h>
+#include <keyboard.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -59,8 +61,7 @@
 /* External variables --------------------------------------------------------*/
 extern DMA_HandleTypeDef hdma_adc;
 extern ADC_HandleTypeDef hadc;
-extern TIM_HandleTypeDef htim2;
-
+extern TIM_HandleTypeDef htim21;
 /* USER CODE BEGIN EV */
 extern TIM_HandleTypeDef htim6;
 /* USER CODE END EV */
@@ -153,10 +154,11 @@ void EXTI0_1_IRQHandler(void)
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
   /* USER CODE BEGIN EXTI0_1_IRQn 1 */
   if (B1_Pin == GPIO_PIN_0){
-	  clear_paper_screen();
-	  draw_sys_info();
-	  display_screen();
-	  //draw_menu_parametr_screen();
+	  //clear_paper_screen();
+	  //draw_sys_info();
+	  //display_screen();
+	  draw_menu_parametr_screen(1);
+	  //draw_main_screen();
 
 	  //HAL_TIM_Base_Start_IT(&htim6);
 	  //HAL_ADC_Start_DMA(&hadc, (uint32_t*)&adc, 1);
@@ -202,17 +204,18 @@ void ADC1_COMP_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles TIM2 global interrupt.
+  * @brief This function handles TIM21 global interrupt.
   */
-void TIM2_IRQHandler(void)
+void TIM21_IRQHandler(void)
 {
-  /* USER CODE BEGIN TIM2_IRQn 0 */
+  /* USER CODE BEGIN TIM21_IRQn 0 */
 
-  /* USER CODE END TIM2_IRQn 0 */
-  HAL_TIM_IRQHandler(&htim2);
-  /* USER CODE BEGIN TIM2_IRQn 1 */
-
-  /* USER CODE END TIM2_IRQn 1 */
+  /* USER CODE END TIM21_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim21);
+  /* USER CODE BEGIN TIM21_IRQn 1 */
+  HAL_TIM_Base_Stop_IT(&htim21);
+  set_screen_view_mode(1);
+  /* USER CODE END TIM21_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

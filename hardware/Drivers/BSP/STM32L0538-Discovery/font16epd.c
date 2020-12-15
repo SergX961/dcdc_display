@@ -1777,7 +1777,7 @@ const uint8_t Font16_Table[] =
                           //            
 };
 
-sFONT Font16 = {
+ sFONT Font16 = {
   Font16_Table,
   11, /* Width */    // (11 lines)
   4, /* Height */    // (4 bytes/16pixels)

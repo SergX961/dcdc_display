@@ -415,7 +415,8 @@ void EPD_IO_Init(void)
 
   /* EPD reset pin mamagement */
   EPD_RESET_HIGH();
-  EPD_Delay(10);
+  //EPD_Delay(10);
+  for (uint32_t i=0; i<100000; i++);
 
   /* SPI Configuration */
   SPIx_Init();

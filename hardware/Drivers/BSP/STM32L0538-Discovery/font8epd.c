@@ -1015,7 +1015,7 @@ const uint8_t Font8_Table[] =
 	            //      
 };
 
-sFONT Font8 = {
+ sFONT Font8 = {
   Font8_Table,
   5, /* Width */ //(5 lines)
   2, /* Height */  //(2 bytes/8pixels)

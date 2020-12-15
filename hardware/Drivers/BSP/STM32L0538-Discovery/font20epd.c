@@ -2154,7 +2154,7 @@ const uint8_t Font20_Table[] =
 };
 
 
-sFONT Font20 = {
+ sFONT Font20 = {
   Font20_Table,
   14, /* Width */    // (14 lines)
   5, /* Height */     // (5 bytes/20pixels)

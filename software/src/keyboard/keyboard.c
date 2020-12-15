@@ -1,7 +1,7 @@
 #include "keyboard_internal.h"
 #include "stdint.h"
 
-uint16_t  key_limits[13][2] = {
+const uint16_t  key_limits[13][2] = {
 		{1975, 2055}, //0
 		{4055, 5035}, //1
 		{3692, 3772}, //2
@@ -36,4 +36,8 @@ void add_key_value (uint16_t key_value)
 	if (key_buff_index>2)
 		key_buff_index=0;
 	check_key_pressed();
+}
+
+void set_screen_view_mode (uint8_t new_mode){
+	set_screen_mode (new_mode);
 }

@@ -1,11 +1,11 @@
 #include "../../inc/paper_screen/paper_screen_internal.h"
 #include "../../inc/paper_screen/paper_screen.h"
 #include <stdio.h>
-#include <stdint.h>
-#include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
+//#include <string.h>
 
-#include "stm32l0538_discovery_epd.h"
+
 #include "fontsepd.h"
 #include "epd.h"
 
@@ -18,31 +18,9 @@
 
 static sFONT * pFont = &Font12;
 uint8_t current_info_row = 0;
-uint32_t current_parametr_screen = 0;
-
-
 
 uint8_t screen_paper_memory[3096] = {0};
 
-uint8_t info_names[MAX_INFO_ROWS_NUM][30] = {
-		"Voltage cut", "Charging type", "Charge threshold Pb lower", "Charge threshold Pb upper",
-		"Charge threshold others", "Discharge threshold", "Quantity cans", "Capacity",
-		"Max allowable capacity", "Internal voltage default", "Type battery"
-	};
-uint8_t info_values[MAX_INFO_ROWS_NUM][20] = {
-		"5V", "TEXT", "TEXT", "TEXT",
-		"TEXT", "TEXT", "TEXT", "TEXT",
-		"TEXT", "TEXT", "TEXT"
-	};
-uint8_t info_note[MAX_INFO_ROWS_NUM][50] = {
-		"Ni-ca:5-10V\tLiFePO4:1215\nLi-io:7-12V\tSLA:4-15V",
-		"TEXT12\tTEXT\nTEXT\tTEXT12", "TEXTTEXT TEXT\nTEXT TEXTTEXT", "TEXTTEXTTEXTTEXTTEXTTEXTTEXT",
-		"TEXT", "TEXT", "TEXT", "TEXT",
-		"TEXT", "TEXT", "TEXT"
-};
-uint8_t info_note_fonts[MAX_INFO_ROWS_NUM] = {
-		16, 16, 12, 12, 12, 12, 16, 16, 12, 12, 16
-};
 
 void clear_paper_screen (void) {
 	for (uint16_t num_cell = 0; num_cell < 3096; num_cell++){
@@ -171,7 +149,7 @@ uint16_t draw_sysinfo_row (uint16_t y_value, uint8_t length, uint8_t * name, uin
 		count_y=current_y-4*pFont->Height*max_rows;
 	}
 	draw_string_fix_len_centre_align(2, current_y, length, name);
-	draw_string_fix_len(length+2, current_y, 170-length, text);
+	draw_string_fix_len_centre_align(length+2, current_y, 170-length, text);
 	draw_h_line(0, count_y+1 , 172);
 	draw_v_line(length+1, count_y+1 , y_value-count_y);
 	draw_v_line(0, count_y+1 , y_value-count_y);
@@ -182,7 +160,7 @@ uint16_t draw_sysinfo_row (uint16_t y_value, uint8_t length, uint8_t * name, uin
 
 void draw_sys_info (void){
 	uint16_t y_value=57;
-	draw_string(48, 58, &"System info");
+	draw_string(48, 58, (uint8_t *)&"System info");
 	draw_h_line(0, 57 , 172);
 
 	while (y_value>0){
@@ -211,8 +189,19 @@ void draw_parametr_screen (uint8_t * name, uint8_t * value, uint8_t * note){
 		set_font(12);
 		draw_string_fix_len_centre_align(1, 60, 170, name);
 	}
-	set_font(16);
-	draw_string_centre_align(86, 25, value);
+
+	ptr = value;
+	size=0;
+	while (*ptr++) size++;
+	if (size <=15) {
+		set_font(16);
+		draw_string_centre_align(86, 25, value);
+	}
+	else {
+		set_font(12);
+		draw_string_fix_len_centre_align(1, 35, 170, value);
+	}
+
 
 	set_font(12);
 	draw_string_fix_len(2, 11, 165, note);
@@ -228,7 +217,7 @@ void draw_parametr_screen (uint8_t * name, uint8_t * value, uint8_t * note){
 	draw_v_line(171, 0 , 72);
 }
 
-void draw_confirm_param_screen (uint8_t * name, uint8_t * note, uint8_t * value){
+void draw_text_param_screen (uint8_t * name, uint8_t * note, uint8_t * text1, uint8_t * text2){
 
 	uint16_t size=0;
 	uint8_t * ptr = name;
@@ -239,70 +228,13 @@ void draw_confirm_param_screen (uint8_t * name, uint8_t * note, uint8_t * value)
 	}
 	else {
 		set_font(12);
-		draw_string_fix_len(1, 60, 170, name);
+		draw_string_fix_len_centre_align(1, 60, 170, name);
 	}
 	set_font(12);
 
-	uint8_t str[30];
-	sprintf((char *)str, "You want to set: %d%d%d", *value, *(value+1), *(value+2));
-
-	draw_string_centre_align(86, 35, &"Confirm?");
-	draw_string_centre_align(86, 22, str);
-	draw_string_fix_len(2, 9, 165, note);
-
-	//menu line
-	draw_h_line(0, 48 , 172);
-
-	//circuit
-	draw_h_line(0, 0 , 172);
-	draw_h_line(0, 71 , 172);
-	draw_v_line(0, 0 , 72);
-	draw_v_line(171, 0 , 72);
-
-}
-
-void draw_apply_param_screen (void){
-
-	uint16_t size=0;
-	uint8_t * ptr = info_names[0];
-	while (*ptr++) size++;
-	if (size <=15) {
-		set_font(16);
-		draw_string_centre_align(86, 50, info_names[0]);
-	}
-	else {
-		set_font(12);
-		draw_string_fix_len(1, 60, 170, info_names[0]);
-	}
-	set_font(12);
-	draw_string_centre_align(86, 35, &"You set: 4");
-
-	//menu line
-	draw_h_line(0, 48 , 172);
-
-	//circuit
-	draw_h_line(0, 0 , 172);
-	draw_h_line(0, 71 , 172);
-	draw_v_line(0, 0 , 72);
-	draw_v_line(171, 0 , 72);
-
-}
-
-void draw_undo_param_screen (void){
-
-	uint16_t size=0;
-	uint8_t * ptr = info_names[0];
-	while (*ptr++) size++;
-	if (size <=15) {
-		set_font(16);
-		draw_string_centre_align(86, 50, info_names[0]);
-	}
-	else {
-		set_font(12);
-		draw_string_fix_len(1, 60, 170, info_names[0]);
-	}
-	set_font(12);
-	draw_string_centre_align(86, 35, &"Impossible to set: 4");
+	draw_string_centre_align(86, 35, text1);
+	draw_string_centre_align(86, 22, text2);
+	draw_string_fix_len(2, 9, 162, note);
 
 	//menu line
 	draw_h_line(0, 48 , 172);
@@ -323,8 +255,10 @@ uint8_t * cut_string_by_word (uint8_t length, uint8_t * text){
 			* gap_ptr,
 			gap_flag=0;
 	while (*ptr++) size++;
-	uint8_t * buf = calloc(size, sizeof(uint8_t));
-	strcpy((char *)buf, (char *)text);
+	uint8_t * buf;
+	buf = calloc(size, sizeof(uint8_t));
+	for(uint8_t i=0; i<=size; i++)
+		buf[i]=text[i];
 	ptr=buf;
 	gap_ptr=buf;
 	while(*buf!=0){
@@ -438,7 +372,7 @@ uint8_t draw_string_fix_len_centre_align  (uint16_t x_value, uint16_t y_value, u
 		}
 
 	}
-
+	//free(ptr);
 	return current_line;
 }
 
@@ -446,7 +380,8 @@ void draw_string_fix_len  (uint16_t x_value, uint16_t y_value, uint8_t length, u
 	uint16_t
 		num_ch = 0,
 		count_x=x_value,
-		count_y=y_value;
+		count_y=y_value,
+		centre = x_value+length/2;
 
 	uint8_t current_line=1,
 			max_char_str=length/pFont->Width;
@@ -463,9 +398,10 @@ void draw_string_fix_len  (uint16_t x_value, uint16_t y_value, uint8_t length, u
 			count_x += pFont->Width;
 			num_ch++;
 		}
-		if (*text==9) count_x=83;
+		if (*text==9) count_x=centre;
 		text++;
 	}
+	//free(text);
 }
 
 //Вывод строки выровненной по центру
